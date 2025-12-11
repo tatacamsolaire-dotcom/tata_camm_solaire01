@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      HOME: /home/runner
 
     steps:
       - name: Checkout repository
@@ -20,11 +22,21 @@ jobs:
           channel: 'stable'
           flutter-version: '3.16.0'
 
+      - name: Flutter --version
+        run: flutter --version
+
+      - name: Flutter pub get (pre)
+        run: echo "pre check"
+
+      - name: Create Flutter project scaffold (if needed)
+        run: |
+          # create a fresh Flutter app scaffold in-place (won't overwrite lib/ or pubspec)
+          flutter create -t app .
+          # ensure pubspec is valid
+          cat pubspec.yaml
+
       - name: Flutter pub get
         run: flutter pub get
-
-      - name: Ensure android/ and ios/ exist
-        run: flutter create . || true
 
       - name: Build APK (release)
         run: flutter build apk --release --no-shrink
