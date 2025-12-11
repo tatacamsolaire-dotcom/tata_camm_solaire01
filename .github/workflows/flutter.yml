@@ -1,48 +1,38 @@
-name: Build Flutter APK
+name: Build Flutter APK (debug)
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - principal
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      HOME: /home/runner
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
-          flutter-version: '3.16.0'
-
-      - name: Flutter --version
-        run: flutter --version
-
-      - name: Flutter pub get (pre)
-        run: echo "pre check"
+          flutter-version: 'stable'
 
       - name: Create Flutter project scaffold (if needed)
         run: |
-          # create a fresh Flutter app scaffold in-place (won't overwrite lib/ or pubspec)
-          flutter create -t app .
-          # ensure pubspec is valid
-          cat pubspec.yaml
+          flutter create -t app . --project-name=gestion_de_vente_pro --org=com.tatacamm
 
       - name: Flutter pub get
         run: flutter pub get
 
-      - name: Build APK (release)
-        run: flutter build apk --release --no-shrink
+      - name: Build APK (debug)
+        run: flutter build apk --debug
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: app-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
