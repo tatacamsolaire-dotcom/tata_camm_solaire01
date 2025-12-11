@@ -1,4 +1,4 @@
-name: Build Flutter APK (debug)
+name: Build Flutter APK
 
 on:
   workflow_dispatch:
@@ -17,13 +17,24 @@ jobs:
           java-version: '17'
 
       - name: Install Flutter
+        # on some runners the channel-only can fail; we use an explicit version
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
+          flutter-version: '3.16.0'  # <- version explicite (tu peux changer si besoin)
+
+      - name: Flutter --version
+        run: flutter --version
+
+      - name: Flutter pub get (pre)
+        run: flutter pub get
 
       - name: Create Flutter project scaffold (if needed)
         run: |
-          flutter create -t app . --project-name=gestion_de_vente_pro --org=com.tatacamm
+          if [ ! -d "android" ] || [ ! -d "ios" ]; then
+            flutter create -t app . --project-name=gestion_de_vente_pro --org=com.tatacamm
+          else
+            echo "android/ et ios/ existent déjà, pas de scaffold."
+          fi
 
       - name: Flutter pub get
         run: flutter pub get
@@ -31,7 +42,7 @@ jobs:
       - name: Build APK (debug)
         run: flutter build apk --debug
 
-      - name: Upload APK artifact
+      - name: Upload debug APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
