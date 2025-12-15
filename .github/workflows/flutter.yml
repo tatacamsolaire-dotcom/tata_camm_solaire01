@@ -6,8 +6,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Set up Java
@@ -16,33 +17,25 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install Flutter
-        # on some runners the channel-only can fail; we use an explicit version
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.16.0'  # <- version explicite (tu peux changer si besoin)
+          flutter-version: '3.16.0'
+          channel: 'stable'
 
-      - name: Flutter --version
-        run: flutter --version
-
-      - name: Flutter pub get (pre)
-        run: flutter pub get
+      - name: Flutter doctor
+        run: flutter doctor
 
       - name: Create Flutter project scaffold (if needed)
-        run: |
-          if [ ! -d "android" ] || [ ! -d "ios" ]; then
-            flutter create -t app . --project-name=gestion_de_vente_pro --org=com.tatacamm
-          else
-            echo "android/ et ios/ existent déjà, pas de scaffold."
-          fi
+        run: flutter create . --project-name=gestion_de_vente_pro --org=com.tatacamm || true
 
       - name: Flutter pub get
         run: flutter pub get
 
-      - name: Build APK (debug)
+      - name: Build debug APK
         run: flutter build apk --debug
 
-      - name: Upload debug APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
